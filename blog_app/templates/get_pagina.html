@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block Titulo %}                           
+  <h1 class="fw-bolder mb-1">{{ publicacion.titulo }}</h1>                       
+{% endblock %}  
+
+    
+{% block contenido %}
+  <h3>{{ publicacion.subtitulo }}</h3>
+  <p>{{ publicacion.contenido }}</p>
+  <p>{{ publicacion.fecha_creacion }}</p>
+{% endblock %}
+
