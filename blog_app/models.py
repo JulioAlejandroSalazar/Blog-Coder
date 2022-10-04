@@ -17,8 +17,4 @@ class Publicacion(models.Model):
 
 class ImagenPublicacion(models.Model):
     id_Publicacion = models.OneToOneField(Publicacion, on_delete=models.CASCADE)
-    imglit = models.ImageField(upload_to='publicacion', null=True, blank=True)
-   
-class Avatar(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    avatar = models.ImageField(upload_to='avatares', null=True, blank=True)    
+    imagen = models.ImageField(upload_to='publicacion', null=True, blank=True)

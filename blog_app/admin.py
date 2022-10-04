@@ -3,4 +3,3 @@ from .models import *
 
 admin.site.register(Publicacion)
 admin.site.register(ImagenPublicacion)
-admin.site.register(Avatar)

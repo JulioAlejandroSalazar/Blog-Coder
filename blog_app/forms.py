@@ -1,19 +1,14 @@
 from django import forms
-from ckeditor_uploader.fields import RichTextUploadingField
 from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+from django.contrib.auth.forms import UserCreationForm
+from ckeditor.widgets import CKEditorWidget
 
 
 class PublicacionForm(forms.Form):
     titulo = forms.CharField(max_length=20)
     subtitulo = forms.CharField(max_length=20)
-    contenido = RichTextUploadingField()
-
-   
-class BuscarPublicacionForm(forms.Form):
-    titulo = forms.CharField(max_length=50)
-    subtitulo = forms.CharField(max_length=100)
-    contenido = forms.CharField(max_length=2000)
+    contenido = forms.CharField(widget=CKEditorWidget())
+    imagen = forms.ImageField(required=False)
        
 
 class UserRegisterForm(UserCreationForm):
@@ -30,19 +25,7 @@ class UserRegisterForm(UserCreationForm):
 class UserEditForm(UserRegisterForm):
     first_name = forms.CharField(label="Nombre")
     last_name = forms.CharField(label="Apellido")
-    fecha_nacimiento = forms.DateField(label="Fecha de nacimiento")
 
     class Meta:
         model = User
-        fields = ["email", "password1", "password2", "first_name", "last_name", "fecha_nacimiento"]
-
-
-class UserFindForm(forms.Form):
-    nombre = forms.CharField(max_length=20)
-    apellido = forms.CharField(max_length=20)
-    email = forms.EmailField()
-    fecha_nacimiento = forms.DateField()
-   
-    
-class UserChangeForm(UserChangeForm):
-    Imagen= forms.ImageField (required=False)
+        fields = ["email", "password1", "password2", "first_name", "last_name"]

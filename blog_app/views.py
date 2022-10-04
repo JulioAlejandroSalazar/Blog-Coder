@@ -38,17 +38,22 @@ def get_pagina(request, id_publicacion):
 def crear_pagina(request):
     if request.method == "POST":
         formulario = PublicacionForm(request.POST)
+        usuario = request.user.username
         if formulario.is_valid():
-            info = formulario.cleaned_data
-            titulo = info["titulo"]
-            subtitulo = info["subtitulo"]
-            contenido = info["contenido"]
-            autor = info["autor"]
-            fecha = info["fecha"]
-            imagen = info["imagen"]
-            Publicacion = Publicacion(titulo = titulo, subtitulo = subtitulo, contenido = contenido, autor = autor, fecha = fecha, imagen = imagen)
-            Publicacion.save()
-            return render(request, "leer_paginas.html", {"mensaje" : "publicación creada correctamente"})
+            publicacion = Publicacion(
+                titulo = request.POST.get("titulo"),
+                subtitulo = request.POST.get("subtitulo"),
+                contenido = request.POST.get("contenido"),
+                autor = usuario
+            )
+            publicacion.save()
+
+            if 'imagen' in request.FILES:
+                img = request.FILES["imagen"]
+                imagen = ImagenPublicacion(id_Publicacion=publicacion, imagen=img)
+                imagen.save()
+            publicaciones = Publicacion.objects.all()
+            return render(request, "leer_paginas.html", {"publicacion" : publicaciones, "mensaje" : "publicación creada correctamente"})
         else:
             return render(request, "crear_pagina.html", {"mensaje" : "Datos inválidos, vuelva a intentarlo", "formulario" : PublicacionForm()})
 
@@ -60,32 +65,52 @@ def crear_pagina(request):
 @login_required
 def editar_pagina(request, id_publicacion):
     publicacion = Publicacion.objects.get(id_publicacion=id_publicacion)
-    formulario_viejo = PublicacionForm(instance = publicacion)
+    publicacion_imagen = ImagenPublicacion.objects.get(id_Publicacion=id_publicacion)
+    formulario_viejo = PublicacionForm(initial = {
+        "titulo" : publicacion.titulo,
+        "subtitulo" : publicacion.subtitulo,
+        "contenido" : publicacion.contenido,
+        "imagen" : publicacion_imagen.imagen,
+    })
     if request.method == "POST":
         formulario_nuevo = PublicacionForm(request.POST)
         if formulario_nuevo.is_valid():
             info = formulario_nuevo.cleaned_data
             publicacion.titulo = info["titulo"]
             publicacion.subtitulo = info["subtitulo"]
-            publicacion.cuerpo = info["cuerpo"]
-            publicacion.autor = info["autor"]
-            publicacion.fecha = info["fecha"]
-            publicacion.imagen = info["imagen"]
+            publicacion.contenido = info["contenido"]
             publicacion.save()
+
+            img = ImagenPublicacion.objects.filter(id_Publicacion = publicacion)
+            if "imagen" in request.FILES:
+                imagen_nueva = request.FILES["imagen"]
+                if img.exists():
+                    if imagen_nueva:
+                        img = img[0]
+                        img.imagen = imagen_nueva
+                        img.save()
+                else:
+                    img = ImagenPublicacion(id_Publicacion=publicacion, imagen=imagen_nueva)
+                    img.save()
+
             return render(request, "get_pagina.html", {"mensaje" : "Publicación editada correctamente", "publicacion" : publicacion})
         else:
-            return render(request, "editar_pagina.html", {"formulario" : formulario_viejo, "mensaje" : "Datos inválidos, vuelva a intentarlo"})
+            return render(request, "editar_pagina.html", {"formulario" : formulario_viejo, "mensaje" : "Datos inválidos, vuelva a intentarlo", "publicacion" : publicacion})
 
     else:
-        return render(request, "editar_pagina.html", {"formulario" : formulario_viejo})
+        return render(request, "editar_pagina.html", {"formulario" : formulario_viejo, "publicacion" : publicacion})
 
 
 
 @login_required
 def eliminar_pagina(request, id_publicacion):
     publicacion = Publicacion.objects.get(id_publicacion=id_publicacion)
-    publicacion.delete()
-    return render(request, "paginas.html", {"mensaje" : "Publicacion eliminada correctamente"})
+    if request.method == "POST":
+        publicacion.delete()
+        return render(request, "leer_paginas.html", {"mensaje" : "Publicacion eliminada correctamente"})
+    else:
+
+        return render(request, "eliminar_paginas.html", {"publicacion" : publicacion})
 
 ##########################################
 
@@ -152,7 +177,6 @@ def editar_perfil(request):
             usuario.password2 = info["password2"]
             usuario.first_name = info["first_name"]
             usuario.last_name = info["last_name"]
-            usuario.fecha_nacimiento = info["fecha_nacimiento"]
             usuario.save()
             return render(request, "get_perfil.html", {"usuario" : usuario, "mensaje" : "editado correctamente"})
         else:

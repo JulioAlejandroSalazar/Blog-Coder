@@ -8,7 +8,8 @@
 {% block formulario %}
         <form  action="{% url 'crear_pagina' %}"  method="POST"  enctype="multipart/form-data">{% csrf_token %}
         <table>
-                {{ formulario.as_table }}   
+                {{ formulario.media }}
+                {{ formulario }}   
         </table>     
         <input  type="submit"  value="Guardar">
         </form>
