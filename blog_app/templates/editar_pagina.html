@@ -6,7 +6,7 @@
 {% endblock %}     
 
 {% block formulario %}
-  <form  action="{% url 'editar_pagina' publicacion.id_publicacion %}"   method="POST">{% csrf_token %}
+  <form  action="{% url 'editar_pagina' publicacion.id_publicacion %}" method="POST"  enctype="multipart/form-data">{% csrf_token %}
     <table>
         {{ formulario.media }}
       {{ formulario.as_table }}   

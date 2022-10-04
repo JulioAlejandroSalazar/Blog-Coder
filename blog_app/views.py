@@ -22,7 +22,10 @@ def sobre_nosotros(request):
 
 def paginas(request):
     publicaciones = Publicacion.objects.all()
-    return render(request, "leer_paginas.html", {"publicaciones" : publicaciones, "mensaje" : "No hay páginas aún"})
+    if not publicaciones.exists():
+        return render(request, "leer_paginas.html", {"publicaciones" : publicaciones, "mensaje" : "No hay páginas aún"})
+    else:
+        return render(request, "leer_paginas.html", {"publicaciones" : publicaciones})
 
 ##########################################
 
@@ -53,7 +56,7 @@ def crear_pagina(request):
                 imagen = ImagenPublicacion(id_Publicacion=publicacion, imagen=img)
                 imagen.save()
             publicaciones = Publicacion.objects.all()
-            return render(request, "leer_paginas.html", {"publicacion" : publicaciones, "mensaje" : "publicación creada correctamente"})
+            return render(request, "leer_paginas.html", {"publicaciones" : publicaciones, "mensaje" : "publicación creada correctamente"})
         else:
             return render(request, "crear_pagina.html", {"mensaje" : "Datos inválidos, vuelva a intentarlo", "formulario" : PublicacionForm()})
 
@@ -65,12 +68,10 @@ def crear_pagina(request):
 @login_required
 def editar_pagina(request, id_publicacion):
     publicacion = Publicacion.objects.get(id_publicacion=id_publicacion)
-    publicacion_imagen = ImagenPublicacion.objects.get(id_Publicacion=id_publicacion)
     formulario_viejo = PublicacionForm(initial = {
         "titulo" : publicacion.titulo,
         "subtitulo" : publicacion.subtitulo,
         "contenido" : publicacion.contenido,
-        "imagen" : publicacion_imagen.imagen,
     })
     if request.method == "POST":
         formulario_nuevo = PublicacionForm(request.POST)
@@ -107,9 +108,9 @@ def eliminar_pagina(request, id_publicacion):
     publicacion = Publicacion.objects.get(id_publicacion=id_publicacion)
     if request.method == "POST":
         publicacion.delete()
-        return render(request, "leer_paginas.html", {"mensaje" : "Publicacion eliminada correctamente"})
+        publicaciones = Publicacion.objects.all()
+        return render(request, "leer_paginas.html", {"mensaje" : "Publicacion eliminada correctamente", "publicaciones" : publicaciones})
     else:
-
         return render(request, "eliminar_paginas.html", {"publicacion" : publicacion})
 
 ##########################################
